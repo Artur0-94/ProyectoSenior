@@ -35,16 +35,19 @@ import Clases.*;
 public class Empleados extends JFrame {
 	
 	String sValor = null;
+	String sTipo = null;
 	private JPanel contentPane;
 	private JTextField textNumero;
 	private JTextField textNombre;
 	ButtonGroup g1 = new  ButtonGroup();
+	ButtonGroup g2 = new  ButtonGroup();
 
 	
 	public void limpiar() {
 	//	textNumero.setText("");
 		textNombre.setText("");	
 		g1.clearSelection();
+		g2.clearSelection();
 		textNumero.transferFocus();
 	}
 	public void llenarNumEmp() {
@@ -320,15 +323,19 @@ public class Empleados extends JFrame {
 		            		(rdbtnAuxiliar).setSelected(true);
 		            		
 						}
+		            	if(sTipo.equals("Interno")) {
+		            		(rdbtnInterno).setSelected(true);
+		            		
+						}
+		            	if(sTipo.equals("Externo")) {
+		            		(rdbtnExterno).setSelected(true);
+		            		
+						}
 		            	
 		            	JOptionPane.showMessageDialog(null, "consulta exitosa.");
 		            	 stmt.close();
 				         cnx.close();
-		            
-						
-						
-		            	//llenarNumEmp();
-		            //	limpiar();
+		            	
 		            }
 		          
 
@@ -442,6 +449,9 @@ public class Empleados extends JFrame {
 		g1.add(rdbtnAuxiliar);
 		g1.add(rdbtnChofer);
 		g1.add(rdbtnCargador);
+		g2.add(rdbtnInterno);
+		g2.add(rdbtnExterno);
+		
 		
 		JButton btnEliminar = new JButton("Eliminar");
 		btnEliminar.addActionListener(new ActionListener() {
@@ -541,6 +551,14 @@ public class Empleados extends JFrame {
 					
 					sValor = rdbtnCargador.getLabel();
 				
+				}if(rdbtnInterno.isSelected() == true) {
+					
+					sTipo = rdbtnInterno.getLabel();
+				
+				}if(rdbtnExterno.isSelected() == true) {
+					
+					sTipo = rdbtnExterno.getLabel();
+				
 				}
 			
 				
@@ -566,7 +584,7 @@ public class Empleados extends JFrame {
 		            stmt.setString(1, SnumEmp);
 		            stmt.setString(2, SnomEmp);
 		            stmt.setString(3, sValor);
-		            stmt.setString(4, "interno");
+		            stmt.setString(4, sTipo);
 		            stmt.registerOutParameter("codigoRet", Types.CHAR);
 		            stmt.registerOutParameter("mensaje", Types.VARCHAR);
 
