@@ -29,6 +29,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JRadioButton;
+import java.awt.Window.Type;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 
 public class Movimientos extends JFrame {
@@ -52,6 +55,7 @@ public void limpiar() {
 			textFechaMov.setText("");	
 			textDiasLaborales.setText("");		
 			textEntregas.setText("");	
+			texSueldo.setText("");
 			textNumeroMov.transferFocus();
 	}
 public void llenarNumEmp() {
@@ -117,6 +121,8 @@ public void llenarNumEmp() {
 	 * Create the frame.
 	 */
 	public Movimientos() {
+		setType(Type.POPUP);
+		setTitle("Movimientos");
 		
 		addWindowStateListener(new WindowStateListener() {
 			public void windowStateChanged(WindowEvent e) {
@@ -125,10 +131,15 @@ public void llenarNumEmp() {
 		});
 		
 		this.setLocationRelativeTo(null);
-		setModalExclusionType(ModalExclusionType.TOOLKIT_EXCLUDE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 410, 366);
+		setBounds(100, 100, 410, 361);
 		contentPane = new JPanel();
+		contentPane.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				
+			}
+		});
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -138,6 +149,7 @@ public void llenarNumEmp() {
 		panelButton.setLayout(null);
 		panelButton.setBorder(new LineBorder(new Color(0, 0, 0)));
 		contentPane.add(panelButton);
+		setLocationRelativeTo(null);
 		
 		JButton btnNuevoMov = new JButton("Nuevo");
 		btnNuevoMov.addActionListener(new ActionListener() {
@@ -263,14 +275,247 @@ public void llenarNumEmp() {
 		panelButton.add(btnNuevoMov);
 		
 		JButton btnBuscarMov = new JButton("Buscar");
+		btnBuscarMov.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				texSueldo.enable();
+				String SnumEmp = null;
+				SnumEmp = textNumeroMov.getText();
+		
+			
+				 //crea conexion
+		       conexion conexion = new Clases.conexion();
+
+		        //se utiliza para ejecutar proceso
+		        CallableStatement stmt = null;
+		        
+		        String sCodRet = null;
+		        String sNombre = null;
+	        	String sRol = null;
+	        	String sTipo = null;
+	        	String sFecha = null;
+	        	String sDiasTrabajados = null;
+	        	String sEntregas = null;
+	        	Double sSueldo = 0.00;
+
+		        try ( Connection cnx = conexion.conectar()) {
+		        	
+		        	
+
+		            System.out.println("Creando sentencia...");
+		            //el sql de invocación utiliza la notacion call + nombre proceso + parametros requeridos pro el proceso ? separados por ,
+		            String sql = "{call SpBuscarMov ( ?, ?, ?, ?, ?, ?, ? ,?, ?, ?)}";
+		            stmt = cnx.prepareCall(sql);
+
+		            //Bind IN parameter first, then bind OUT parameter
+		            
+		            stmt.setString(1, SnumEmp);
+		            stmt.registerOutParameter("codigoRet", Types.CHAR);
+		            stmt.registerOutParameter("iNumeroEmpleado", Types.INTEGER);
+		            stmt.registerOutParameter("sNombreEmp", Types.VARCHAR);
+		            stmt.registerOutParameter("sRol", Types.CHAR);
+		            stmt.registerOutParameter("sTipo", Types.CHAR);
+		            stmt.registerOutParameter("sFecha", Types.CHAR);
+		            stmt.registerOutParameter("sDiasTrabajados", Types.VARCHAR);
+		            stmt.registerOutParameter("sEntregas", Types.CHAR);
+		            stmt.registerOutParameter("sSueldo", Types.DOUBLE);
+		            System.out.println("Ejecutando el procedimiento almacenado getMensaje...");
+		            stmt.execute();
+
+		            //Recupera el texto del mensaje y lo imprime en la consola
+		            sCodRet = stmt.getString(2);
+		            
+		            sNombre = stmt.getString(4);
+		            sRol = stmt.getString(5);
+		            sTipo = stmt.getString(6);
+		            sFecha = stmt.getString(7);
+		        	sDiasTrabajados = stmt.getString(8);
+		        	sEntregas =stmt.getString(9);
+		        	 sSueldo = stmt.getDouble(10);
+		            
+		           
+		            
+		            if(sCodRet.equals("00000")){
+		            	//textNumero.setText(Integer.toString(stmt.getInt(4)));
+		            	textNombreMov.setText(sNombre);
+		            	textRolMov.setText(sRol);
+		            	textTipoMov.setText(sTipo);
+		            	textFechaMov.setText(sFecha);
+		            	textDiasLaborales.setText(sDiasTrabajados);
+		            	textEntregas.setText(sEntregas);
+		            	texSueldo.setText(Double.toString(sSueldo));
+		            //	textNombre.setText(sTipo);	
+		            	
+		            	
+		            	
+		            	JOptionPane.showMessageDialog(null, "consulta exitosa.");
+		            	 stmt.close();
+				         cnx.close();
+		            	
+		            }
+		          
+
+		        } catch (Exception r) {
+		        	JOptionPane.showMessageDialog(null, "El numero de empleado no se encuentra registrado");
+		        	limpiar();
+		        	System.out.println(r);
+		        }
+		    }
+			
+		});
 		btnBuscarMov.setBounds(81, 11, 89, 23);
 		panelButton.add(btnBuscarMov);
 		
 		JButton btnModificarMov = new JButton("Modificar");
+		btnModificarMov.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				String iNumEmp = null;
+				iNumEmp = textNumeroMov.getText();
+				String sNombre = null;
+				sNombre = textNumeroMov.getText();
+	        	String sRol = null;
+	        	sRol = textRolMov.getText();
+	        	String sTipo = null;
+	        	sTipo = textTipoMov.getText();
+	        	String sFecha = null;
+	        	sFecha = textFechaMov.getText();
+	        	String sDiasTrabajados = null;
+	        	sDiasTrabajados = textDiasLaborales.getText();
+	        	String sEntregas = null;
+	        	sEntregas = textEntregas.getText();
+	        	Double sSueldo = 0.00;
+				
+				if(sNombre.equals("") || iNumEmp.equals("") || sRol.equals("") || sTipo.equals("") |sFecha.equals("") || sDiasTrabajados.equals("") || sEntregas.equals("") || sSueldo.equals("")) {
+				
+					JOptionPane.showMessageDialog(null, "Favor de llenar los campos.");
+					limpiar();
+					
+				}
+				else {
+
+				
+		       conexion conexion = new Clases.conexion();
+
+		        //se utiliza para ejecutar proceso
+		        CallableStatement stmt = null;
+		        
+		        String sCodRet = null;
+		        String sMensaje= null;
+
+		        try ( Connection cnx = conexion.conectar()) {
+
+		            System.out.println("Creando sentencia...");
+		            //el sql de invocación utiliza la notacion call + nombre proceso + parametros requeridos pro el proceso ? separados por ,
+		            String sql = "{call SpActualizaMov (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+		            stmt = cnx.prepareCall(sql);
+
+		            //Bind IN parameter first, then bind OUT parameter
+		            
+		            stmt.setString(1, iNumEmp);
+		            stmt.setString(2, sNombre);
+		            stmt.setString(3, sRol);
+		            stmt.setString(4, sTipo);
+		            stmt.setString(5, sFecha);
+		            stmt.setString(6, sDiasTrabajados);
+		            stmt.setString(7, sEntregas);
+		            stmt.setDouble(8, sSueldo);
+		            stmt.registerOutParameter("codigoRet", Types.CHAR);
+		            stmt.registerOutParameter("mensaje", Types.VARCHAR);
+
+		            
+		            System.out.println("Ejecutando el procedimiento almacenado getMensaje...");
+		            stmt.execute();
+
+		            //Recupera el texto del mensaje y lo imprime en la consola
+		            sCodRet = stmt.getString(9);
+		            sMensaje = stmt.getString(10);
+		            if(sCodRet.equals("00000")){
+		            	JOptionPane.showMessageDialog(null, "Empleado actualizado correctamente.");
+		            	llenarNumEmp();
+		            	limpiar();
+		            }
+		            
+		            System.out.println("Mensaje con el ID:"
+		                    + sCodRet + " is " + sMensaje);
+		            //cerrar recursos
+		            stmt.close();
+		            cnx.close();;
+
+		        } catch (Exception r) {
+		        	JOptionPane.showMessageDialog(null, "El numero de empleado no existe.");
+		        	limpiar();
+		        	System.out.println(r);
+		        }
+		    }
+			
+		}
+		});
 		btnModificarMov.setBounds(159, 11, 89, 23);
 		panelButton.add(btnModificarMov);
 		
 		JButton btnEliminarMov = new JButton("Eliminar");
+		btnEliminarMov.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String SnumEmp = null;
+				SnumEmp = textNumeroMov.getText();
+				
+				if(SnumEmp.equals("")) {
+				
+					JOptionPane.showMessageDialog(null, "Favor de llenar los campos.");
+					limpiar();
+					
+				}
+				
+				 //crea conexion
+		       conexion conexion = new Clases.conexion();
+
+		        //se utiliza para ejecutar proceso
+		        CallableStatement stmt = null;
+		        
+		        String sCodRet = null;
+		        String sMensaje= null;
+
+		        try ( Connection cnx = conexion.conectar()) {
+
+		            System.out.println("Creando sentencia...");
+		            //el sql de invocación utiliza la notacion call + nombre proceso + parametros requeridos pro el proceso ? separados por ,
+		            String sql = "{call SpEliminaMov (?, ?, ?)}";
+		            stmt = cnx.prepareCall(sql);
+
+		            //Bind IN parameter first, then bind OUT parameter
+		            
+		            stmt.setString(1, SnumEmp);
+		            stmt.registerOutParameter("codigoRet", Types.CHAR);
+		            stmt.registerOutParameter("mensaje", Types.VARCHAR);
+
+		            
+		            System.out.println("Ejecutando el procedimiento almacenado getMensaje...");
+		            stmt.execute();
+
+		            //Recupera el texto del mensaje y lo imprime en la consola
+		            sCodRet = stmt.getString(2);
+		            sMensaje = stmt.getString(3);
+		            if(sCodRet.equals("00000")){
+		            	JOptionPane.showMessageDialog(null, "Movimiento eliminado correctamente.");
+		            	//llenarNumEmp();
+		            	limpiar();
+		            }
+		            
+		            System.out.println("Mensaje con el ID:"
+		                    + sCodRet + " is " + sMensaje);
+		            //cerrar recursos
+		            stmt.close();
+		            cnx.close();;
+
+		        } catch (Exception r) {
+		        	JOptionPane.showMessageDialog(null, "El numero de empleado no existe.");
+		        	limpiar();
+		        	System.out.println(r);
+		        }
+			}
+		 
+		});
 		btnEliminarMov.setBounds(246, 11, 89, 23);
 		panelButton.add(btnEliminarMov);
 		
@@ -332,12 +577,12 @@ public void llenarNumEmp() {
 		panelButton_1.add(textFechaMov);
 		
 		JLabel lblHrsLaborales = new JLabel("Dias Laborales");
-		lblHrsLaborales.setBounds(173, 108, 83, 14);
+		lblHrsLaborales.setBounds(173, 108, 103, 14);
 		panelButton_1.add(lblHrsLaborales);
 		
 		textDiasLaborales = new JTextField();
 		textDiasLaborales.setColumns(10);
-		textDiasLaborales.setBounds(254, 104, 39, 20);
+		textDiasLaborales.setBounds(263, 104, 39, 20);
 		panelButton_1.add(textDiasLaborales);
 		
 		JLabel lblHrsLaborales_1_1 = new JLabel("Entregas:");
@@ -350,12 +595,13 @@ public void llenarNumEmp() {
 		panelButton_1.add(textEntregas);
 		
 		texSueldo = new JTextField();
+		texSueldo.setEnabled(false);
 		texSueldo.setColumns(10);
-		texSueldo.setBounds(71, 170, 53, 20);
+		texSueldo.setBounds(249, 143, 53, 20);
 		panelButton_1.add(texSueldo);
 		
-		JLabel Sueldo = new JLabel("Sueldo:");
-		Sueldo.setBounds(10, 173, 71, 14);
-		panelButton_1.add(Sueldo);
+		JLabel vSueldo = new JLabel("Sueldo:");
+		vSueldo.setBounds(173, 146, 71, 14);
+		panelButton_1.add(vSueldo);
 	}
 }

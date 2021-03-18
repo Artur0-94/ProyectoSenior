@@ -137,6 +137,7 @@ public class Empleados extends JFrame {
 		contentPane.setToolTipText("");
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+		setLocationRelativeTo(null);
 		
 		JPanel panelButton = new JPanel();
 		panelButton.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -342,7 +343,8 @@ public class Empleados extends JFrame {
 		        } catch (Exception r) {
 		        	JOptionPane.showMessageDialog(null, "El numero de empleado no se encuentra registrado");
 		        	textNumero.setText("");
-		        	textNumero.transferFocus();
+		        	//textNumero.transferFocus();
+		        	limpiar();
 		        	System.out.println(r);
 		        }
 		    }
@@ -523,6 +525,7 @@ public class Empleados extends JFrame {
 		
 		btnNuevo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
 				String SnumEmp = null;
 				SnumEmp = textNumero.getText();
 				String SnomEmp = null;
